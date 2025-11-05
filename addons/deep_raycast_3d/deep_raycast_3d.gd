@@ -57,6 +57,17 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		to = value
 		update_configuration_warnings()
 
+## 
+@export var exclude_parent: bool = true:
+	set(value):
+		exclude_parent = value
+		if get_parent():
+			if exclude_parent == true:
+				add_exclude(get_parent())
+			else:
+				remove_exclude(get_parent())
+
+
 ## The list of object RIDs that will be excluded from collisions. Use CollisionObject3D.get_rid() to get the RID associated with a CollisionObject3D-derived node. Note: The returned array is copied and any changes to it will not update the original property value. To update the value you need to modify the returned array, and then assign it to the property again. 
 @export var excludes: Array[Node3D] = []
 
@@ -101,14 +112,14 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 func add_exclude(_exclude: PhysicsBody3D) -> void:
 	if _exclude == null:
 		return
-	
 	if _excludes.has(_exclude.get_rid()):
 		return
-	
+		
 	_excludes.append(_exclude.get_rid())
 
 	if is_instance_valid(_params):
 		_params.exclude = _excludes
+
 
 ## Removes an area or a 3D body so that it is not excluded from raycast detections.	
 func remove_exclude(_exclude: PhysicsBody3D) -> void:
@@ -259,10 +270,12 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	_material = RESOURCE_MATERIAL
-	if excludes:
-		for e in excludes:
-			if e:
-				_excludes.append(e.get_rid())
+
+	for e in excludes:
+		if e:
+			_excludes.append(e.get_rid())
+	if exclude_parent == true:
+		add_exclude(get_parent())
 	_create_line()
 	_update_line()
 	_update_raycast()
