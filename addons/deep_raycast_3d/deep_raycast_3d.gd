@@ -18,24 +18,55 @@ var deep_results: Array[DeepRaycast3DResult] = []
 signal cast_collider(results: Array[DeepRaycast3DResult])
 
 #region Exports ====================================================================================
+## Enables or disables raycast verification.
 @export var enabled: bool = true
+
+## The margin of verification between objects that will be traversed by the raycast.
 @export_range(0.01, 1.0, 0.01, "or_greater", "suffix:m") var margin: float = 0.01
+
+## The maximum number of objects that a raycast can pass through.
 @export_range(1, 32, 1) var max_results: int = 10
+
+## Raycast display color in 3D space.
 @export_color_no_alpha() var color: Color = Color.RED
+
+## The opacity of the raycast displayed in 3D space.
 @export_range(0.01, 1.0, 0.01) var opacity: float = 0.7
+
+## Enable or disable streaming in Raycast.
 @export var activate_emission: bool = true
+
+## The raycast emission level.
 @export_range(0.0, 10.0, 0.01, "or_greater") var emission_energy: float = 10.0
+
+## The raycast beam.
 @export_range(0.01, 0.5, 0.01, "suffix:m") var radius: float = 0.02
+
+## Enable or disable collision checking with bodies.
 @export var collide_with_bodies: bool = true
+
+## Enable or disable collision checking with 3D areas.
 @export var collide_with_areas: bool = false
+
+## If true, the query will hit back faces with concave polygon shapes with back face enabled or heightmap shapes.
 @export var hit_back_faces: bool = true
+
+## If true, the query will detect a hit when starting inside shapes. In this case the collision normal will be Vector3(0, 0, 0). Does not affect concave polygon shapes or heightmap shapes.
 @export var hit_from_inside: bool = true
+
+## The list of object RIDs that will be excluded from collisions. Use CollisionObject3D.get_rid() to get the RID associated with a CollisionObject3D-derived node. Note: The returned array is copied and any changes to it will not update the original property value. To update the value you need to modify the returned array, and then assign it to the property again. 
 @export var excludes: Array[Node3D] = []
+
+## Raycast destination. Example: a Marker3D or a Node3D.
 @export var to: Node3D:
 	set(value):
 		to = value
 		update_configuration_warnings()
+
+## The physics layers the query will detect (as a bitmask). By default, all collision layers are detected. See Collision layers and masks   in the documentation for more information.
 @export_flags_3d_physics() var collision_mask = (1 << 0)
+
+## The render layers the query will detect (as a bitmask).
 @export_flags_3d_render() var layers = (1 << 0):
 	set(value):
 		layers = value
