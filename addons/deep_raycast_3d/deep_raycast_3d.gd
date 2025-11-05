@@ -57,7 +57,7 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		to = value
 		update_configuration_warnings()
 
-## 
+## Ignore the parent node.
 @export var exclude_parent: bool = true:
 	set(value):
 		exclude_parent = value
