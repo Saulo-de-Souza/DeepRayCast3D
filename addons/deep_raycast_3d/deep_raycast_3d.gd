@@ -39,7 +39,7 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 ## The raycast emission level.
 @export_range(0.0, 10.0, 0.01, "or_greater") var emission_energy: float = 10.0
 
-## The raycast beam.
+## The raycast radius.
 @export_range(0.01, 0.5, 0.01, "suffix:m") var radius: float = 0.02
 
 ## Enable or disable collision checking with bodies.
@@ -53,6 +53,20 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 
 ## If true, the query will detect a hit when starting inside shapes. In this case the collision normal will be Vector3(0, 0, 0). Does not affect concave polygon shapes or heightmap shapes.
 @export var hit_from_inside: bool = true
+
+## Number of rings in the raycast rendering.
+@export_range(3, 10, 1) var rings: int = 4:
+	set(value):
+		rings = value
+		if is_instance_valid(_mesh):
+			_mesh.rings = rings
+
+## Number of segments in the raycast rendering.
+@export_range(4, 64, 4) var segments: int = 64:
+	set(value):
+		segments = value
+		if is_instance_valid(_mesh):
+			_mesh.radial_segments = segments
 
 ## The list of object RIDs that will be excluded from collisions. Use CollisionObject3D.get_rid() to get the RID associated with a CollisionObject3D-derived node. Note: The returned array is copied and any changes to it will not update the original property value. To update the value you need to modify the returned array, and then assign it to the property again. 
 @export var excludes: Array[Node3D] = []
@@ -86,6 +100,8 @@ func _create_line() -> void:
 	_mesh = CylinderMesh.new()
 	_mesh.top_radius = radius
 	_mesh.bottom_radius = radius
+	_mesh.rings = rings
+	_mesh.radial_segments = segments
 	_mesh.height = _distance
 	_mesh.material = _material
 
