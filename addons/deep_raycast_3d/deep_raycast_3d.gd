@@ -1,7 +1,7 @@
 @tool
 class_name DeepRayCast3D
 extends Node3D
-
+# TODO: Alterar TO para um Vector3
 
 #region Private Properties =========================================================================
 var RESOURCE_MATERIAL: StandardMaterial3D = preload("res://addons/deep_raycast_3d/resources/material.tres")
