@@ -109,22 +109,26 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 #region Public Methods =============================================================================
 		
 ## Add an area or a 3D body to be excluded from raycast detections.			
-func add_exclude(_exclude: PhysicsBody3D) -> void:
+func add_exclude(_exclude: Variant) -> void:
 	if _exclude == null:
 		return
-	if _excludes.has(_exclude.get_rid()):
+	if not _exclude.has_method("get_rid"):
 		return
 		
-	_excludes.append(_exclude.get_rid())
+	if _excludes.has(_exclude.get_rid()):
+		return
+	if _exclude.has_method("get_rid"):
+		_excludes.append(_exclude.get_rid())
 
 	if is_instance_valid(_params):
 		_params.exclude = _excludes
 
 
 ## Removes an area or a 3D body so that it is not excluded from raycast detections.	
-func remove_exclude(_exclude: PhysicsBody3D) -> void:
-	if _excludes.has(_exclude.get_rid()):
-		_excludes.erase(_exclude.get_rid())
+func remove_exclude(_exclude: Variant) -> void:
+	if _exclude.has_method("get_rid"):
+		if _excludes.has(_exclude.get_rid()):
+			_excludes.erase(_exclude.get_rid())
 	
 	if is_instance_valid(_params):
 		_params.exclude = _excludes
