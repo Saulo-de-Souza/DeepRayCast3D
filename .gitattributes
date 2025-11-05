@@ -3,4 +3,4 @@ gp.bat export-ignore
 .gitattributes export-ignore
 README.md export-ignore
 LICENSE.md export-ignore
-deep_raycast_3d/icon.png export-ignore
+addons/deep_raycast_3d/icon.png export-ignore
