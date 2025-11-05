@@ -230,7 +230,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 func _enter_tree() -> void:
 	update_configuration_warnings()
 	
-	
+
 func _ready() -> void:
 	_material = RESOURCE_MATERIAL
 	if excludes:
@@ -244,6 +244,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	transform.origin = Vector3.ZERO
 	_update_line()
 	_update_raycast()
 	_desative_raycast()
