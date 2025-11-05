@@ -13,6 +13,7 @@ var _distance: float = 0.0
 var _excludes: Array[RID] = []
 var _material: StandardMaterial3D = RESOURCE_MATERIAL
 var deep_results: Array[DeepRaycast3DResult] = []
+var _params: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
 #endregion Private Properties ======================================================================
 
 signal cast_collider(results: Array[DeepRaycast3DResult])
@@ -92,6 +93,31 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		if is_instance_valid(_mesh_instance):
 			_mesh_instance.layers = layers
 #endregion Exports =================================================================================
+
+
+#region Public Methods =============================================================================
+		
+## Add an area or a 3D body to be excluded from raycast detections.			
+func add_exclude(_exclude: PhysicsBody3D) -> void:
+	if _exclude == null:
+		return
+	
+	if _excludes.has(_exclude.get_rid()):
+		return
+	
+	_excludes.append(_exclude.get_rid())
+
+	if is_instance_valid(_params):
+		_params.exclude = _excludes
+
+## Removes an area or a 3D body so that it is not excluded from raycast detections.	
+func remove_exclude(_exclude: PhysicsBody3D) -> void:
+	if _excludes.has(_exclude.get_rid()):
+		_excludes.erase(_exclude.get_rid())
+	
+	if is_instance_valid(_params):
+		_params.exclude = _excludes
+#endregion Public Methods ==========================================================================
 
 
 #region Private Methods ============================================================================
@@ -184,17 +210,17 @@ func _update_raycast() -> void:
 
 		var to_point := from + to_dir * remaining_distance
 
-		var params := PhysicsRayQueryParameters3D.new()
-		params.from = from
-		params.to = to_point
-		params.collide_with_areas = collide_with_areas
-		params.collide_with_bodies = collide_with_bodies
-		params.collision_mask = collision_mask
-		params.exclude = local_excludes
-		params.hit_back_faces = hit_back_faces
-		params.hit_from_inside = hit_from_inside
+		_params = PhysicsRayQueryParameters3D.new()
+		_params.from = from
+		_params.to = to_point
+		_params.collide_with_areas = collide_with_areas
+		_params.collide_with_bodies = collide_with_bodies
+		_params.collision_mask = collision_mask
+		_params.exclude = local_excludes
+		_params.hit_back_faces = hit_back_faces
+		_params.hit_from_inside = hit_from_inside
 
-		var hit := space_state.intersect_ray(params)
+		var hit := space_state.intersect_ray(_params)
 
 		if hit.is_empty():
 			break
