@@ -78,9 +78,9 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 @export var collide_with_areas: bool = false
 ## If true, the query will hit back faces with concave polygon shapes with back face enabled or heightmap shapes.
 @export var hit_back_faces: bool = true
-## If true, the query will detect a hit when starting inside shapes. In this case the collision normal will be Vector3(0, 0, 0). Does not affect concave polygon shapes or heightmap shapes.
+## If true, the query will detect a hit when starting inside shapes. In this case the collision normal will be Vector3(0, 0, 0).
 @export var hit_from_inside: bool = true
-## The physics layers the query will detect (as a bitmask). By default, all collision layers are detected. See Collision layers and masks   in the documentation for more information.
+## The physics layers the query will detect (as a bitmask).
 @export_flags_3d_physics() var collision_mask = (1 << 0)
 
 @export_subgroup("Render")
@@ -102,6 +102,14 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		layers = value
 		if is_instance_valid(_mesh_instance):
 			_mesh_instance.layers = layers
+
+@export_subgroup("Transform")
+## Position offset for the laser relative to the parent node.
+@export var position_offset: Vector3 = Vector3.ZERO:
+	set(value):
+		position_offset = value
+		if is_instance_valid(_node_container):
+			_update_line()
 #endregion =========================================================================================
 
 
@@ -188,23 +196,24 @@ func _update_line() -> void:
 		return
 
 	var parent: Node3D = get_parent()
+	var start_position: Vector3 = parent.to_global(position_offset)
 	var target_position: Vector3
 
 	if auto_forward:
 		# Always points forward relative to parent's local -Z axis
-		target_position = parent.global_position + (parent.global_transform.basis.z * -forward_distance)
+		target_position = start_position + (parent.global_transform.basis.z * -forward_distance)
 	else:
 		if to == null or get_parent() == to:
 			return
 		target_position = to.global_position
 
-	_distance = parent.global_position.distance_to(target_position)
-	_direction = parent.global_position.direction_to(target_position)
+	_distance = start_position.distance_to(target_position)
+	_direction = start_position.direction_to(target_position)
 
 	_mesh.height = _distance
 	_mesh_instance.position.z = _distance / -2
-	_node_container.global_transform.origin = parent.global_position
-	_node_container.look_at(parent.global_position + _direction, Vector3.UP)
+	_node_container.global_transform.origin = start_position
+	_node_container.look_at(start_position + _direction, Vector3.UP)
 	_mesh.top_radius = radius
 	_mesh.bottom_radius = radius
 
@@ -221,22 +230,23 @@ func _update_raycast() -> void:
 	# Handles the actual physics raycasting and collision detection
 	if Engine.is_editor_hint():
 		return
+	_deep_results.clear()
 	if not enabled or not get_parent() is Node3D:
 		return
 
 	var parent: Node3D = get_parent()
-	var from: Vector3 = parent.global_position
+	var from: Vector3 = parent.to_global(position_offset)
 	var target_position: Vector3
 
 	if auto_forward:
-		target_position = parent.global_position + (parent.global_transform.basis.z * -forward_distance)
+		target_position = from + (parent.global_transform.basis.z * -forward_distance)
 	else:
 		if to == null or get_parent() == to:
 			return
 		target_position = to.global_position
 
-	var to_dir: Vector3 = (target_position - parent.global_position).normalized()
-	var remaining_distance: float = parent.global_position.distance_to(target_position)
+	var to_dir: Vector3 = (target_position - from).normalized()
+	var remaining_distance: float = from.distance_to(target_position)
 
 	var space_state: PhysicsDirectSpaceState3D = parent.get_world_3d().direct_space_state
 	var local_excludes: Array[RID] = _excludes.duplicate()
