@@ -1,20 +1,21 @@
 @tool
 @icon("res://addons/deep_raycast_3d/icon-16.png")
-class_name DeepRayCast3D extends Node
+class_name DeepRayCast3D
+extends Node
 
 #region Private Properties =========================================================================
 var _RESOURCE_MATERIAL: StandardMaterial3D = preload("res://addons/deep_raycast_3d/resources/material.tres")
-var _node_container: Node3D = null
-var _mesh_instance: MeshInstance3D = null
-var _mesh: CylinderMesh = null
+var _node_container: Node3D
+var _mesh_instance: MeshInstance3D
+var _mesh: CylinderMesh
 var _direction: Vector3 = Vector3.ZERO
 var _distance: float = 0.0
 var _excludes: Array[RID] = []
 var _material: StandardMaterial3D = _RESOURCE_MATERIAL
 var _deep_results: Array[DeepRaycast3DResult] = []
 var _params: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
-var _warnings = []
-#endregion Private Properties ======================================================================
+var _warnings: PackedStringArray = []
+#endregion =========================================================================================
 
 signal cast_collider(results: Array[DeepRaycast3DResult])
 
@@ -26,7 +27,6 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 @export_range(0.01, 1.0, 0.01, "or_greater", "suffix:m") var margin: float = 0.01
 ## The maximum number of objects that a raycast can pass through.
 @export_range(1, 32, 1) var max_results: int = 10
-
 
 @export_subgroup("Emission")
 ## Enable or disable streaming in Raycast.
@@ -46,25 +46,26 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		if is_instance_valid(_mesh):
 			_mesh.radial_segments = segments
 
-
 @export_subgroup("Interaction")
-## Raycast destination. Example: a Marker3D or a Node3D.
-@export var to: Node3D:
-	set(value):
-		to = value
-		update_configuration_warnings()
-## Ignore the parent node.
+## When enabled, the ray will automatically face forward based on the parent's orientation.
+@export var auto_forward: bool = true
+## Distance of the ray when auto_forward is enabled.
+@export_range(0.1, 100.0, 0.1, "suffix:m") var forward_distance: float = 10.0
+## Target node when auto_forward is disabled (manual mode).
+@export var to: Node3D
+
+## Ignore parent node from collision checks.
 @export var exclude_parent: bool = true:
 	set(value):
 		exclude_parent = value
 		if get_parent():
-			if exclude_parent == true:
+			if exclude_parent:
 				add_exclude(get_parent())
 			else:
 				remove_exclude(get_parent())
-## The list of object RIDs that will be excluded from collisions. Use CollisionObject3D.get_rid() to get the RID associated with a CollisionObject3D-derived node. Note: The returned array is copied and any changes to it will not update the original property value. To update the value you need to modify the returned array, and then assign it to the property again. 
-@export var excludes: Array[Node3D] = []
 
+## Manual exclusion list.
+@export var excludes: Array[Node3D] = []
 
 @export_subgroup("Physics")
 ## Enable or disable collision checking with bodies.
@@ -77,7 +78,6 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 @export var hit_from_inside: bool = true
 ## The physics layers the query will detect (as a bitmask). By default, all collision layers are detected. See Collision layers and masks   in the documentation for more information.
 @export_flags_3d_physics() var collision_mask = (1 << 0)
-
 
 @export_subgroup("Render")
 ## Raycast display color in 3D space.
@@ -92,15 +92,13 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		layers = value
 		if is_instance_valid(_mesh_instance):
 			_mesh_instance.layers = layers
-#endregion Exports =================================================================================
+#endregion =========================================================================================
 
 
 #region Public Methods =============================================================================
-## Add an area or a 3D body to be excluded from raycast detections.			
+## Add a CollisionObject3D or Area3D to be excluded from raycast detection.
 func add_exclude(_exclude: Variant) -> void:
-	if _exclude == null:
-		return
-	if not _exclude.has_method("get_rid"):
+	if _exclude == null or not _exclude.has_method("get_rid"):
 		return
 	if _excludes.has(_exclude.get_rid()):
 		return
@@ -109,18 +107,19 @@ func add_exclude(_exclude: Variant) -> void:
 		_params.exclude = _excludes
 
 
-## Removes an area or a 3D body so that it is not excluded from raycast detections.	
+## Remove a previously excluded object from the raycast.
 func remove_exclude(_exclude: Variant) -> void:
-	if _exclude.has_method("get_rid"):
+	if _exclude and _exclude.has_method("get_rid"):
 		if _excludes.has(_exclude.get_rid()):
 			_excludes.erase(_exclude.get_rid())
 		if is_instance_valid(_params):
 			_params.exclude = _excludes
-#endregion Public Methods ==========================================================================
+#endregion =========================================================================================
 
 
 #region Private Methods ============================================================================
 func _create_line() -> void:
+	# Creates the visual representation of the ray (a thin cylinder)
 	_material.emission = color
 	_material.albedo_color = color
 	_material.albedo_color.a = opacity
@@ -146,26 +145,38 @@ func _create_line() -> void:
 	_mesh_instance.layers = layers
 
 	_node_container.add_child(_mesh_instance)
-	
+
+
 func _verify_mesh() -> void:
-	if not get_parent() is Node3D or to == null or get_parent() == to:
+	# Hide mesh if parent or target is invalid
+	if not get_parent() is Node3D:
+		_mesh_instance.visible = false
+		return
+	if not auto_forward and (to == null or get_parent() == to):
 		_mesh_instance.visible = false
 	else:
 		_mesh_instance.visible = true
-		
+
 
 func _update_line() -> void:
-	if to == null:
-		return
+	# Update the mesh line orientation and size in real-time
 	if not get_parent() is Node3D:
 		return
-	if get_parent() == to:
-		return
-		
-	var parent: Node3D = get_parent() as Node3D
-		
-	_distance = parent.global_position.distance_to(to.global_position)
-	_direction = parent.global_position.direction_to(to.global_position)
+
+	var parent: Node3D = get_parent()
+	var target_position: Vector3
+
+	if auto_forward:
+		# Always points forward relative to parent's local -Z axis
+		target_position = parent.global_position + (parent.global_transform.basis.z * -forward_distance)
+	else:
+		if to == null or get_parent() == to:
+			return
+		target_position = to.global_position
+
+	_distance = parent.global_position.distance_to(target_position)
+	_direction = parent.global_position.direction_to(target_position)
+
 	_mesh.height = _distance
 	_mesh_instance.position.z = _distance / -2
 	_node_container.global_transform.origin = parent.global_position
@@ -173,6 +184,7 @@ func _update_line() -> void:
 	_mesh.top_radius = radius
 	_mesh.bottom_radius = radius
 
+	# Update material in real-time
 	_material.emission = color
 	_material.albedo_color = color
 	_material.albedo_color.a = opacity
@@ -181,24 +193,27 @@ func _update_line() -> void:
 
 
 func _update_raycast() -> void:
+	# Handles the actual physics raycasting and collision detection
 	if Engine.is_editor_hint():
 		return
-	if not enabled:
+	if not enabled or not get_parent() is Node3D:
 		return
-	if not get_parent() is Node3D:
-		return
-	if to == null:
-		return
-	if get_parent() == to:
-		return
-	
-	var parent: Node3D = get_parent() as Node3D
-				
-	var space_state: PhysicsDirectSpaceState3D = parent.get_world_3d().direct_space_state
-	var from: Vector3 = parent.global_position
-	var to_dir: Vector3 = (to.global_position - parent.global_position).normalized()
-	var remaining_distance: float = parent.global_position.distance_to(to.global_position)
 
+	var parent: Node3D = get_parent()
+	var from: Vector3 = parent.global_position
+	var target_position: Vector3
+
+	if auto_forward:
+		target_position = parent.global_position + (parent.global_transform.basis.z * -forward_distance)
+	else:
+		if to == null or get_parent() == to:
+			return
+		target_position = to.global_position
+
+	var to_dir: Vector3 = (target_position - parent.global_position).normalized()
+	var remaining_distance: float = parent.global_position.distance_to(target_position)
+
+	var space_state: PhysicsDirectSpaceState3D = parent.get_world_3d().direct_space_state
 	var local_excludes: Array[RID] = _excludes.duplicate()
 	_deep_results.clear()
 
@@ -219,40 +234,49 @@ func _update_raycast() -> void:
 		_params.hit_from_inside = hit_from_inside
 
 		var hit: Dictionary = space_state.intersect_ray(_params)
-
 		if hit.is_empty():
 			break
 
-		_deep_results.append(DeepRaycast3DResult.new(hit.collider, hit.collider_id, hit.normal, hit.position, hit.face_index, hit.rid, hit.shape))
+		_deep_results.append(
+			DeepRaycast3DResult.new(
+				hit.collider,
+				hit.collider_id,
+				hit.normal,
+				hit.position,
+				hit.face_index,
+				hit.rid,
+				hit.shape
+			)
+		)
 
 		local_excludes.append(hit["collider"].get_rid())
-
 		from = hit["position"] + to_dir * margin
-		remaining_distance = to.global_position.distance_to(from)
+		remaining_distance = target_position.distance_to(from)
 
 	if _deep_results.size() > 0:
 		cast_collider.emit(_deep_results)
-	
-#endregion Private Methods =========================================================================
+#endregion =========================================================================================
 
 
 #region Lifecycles =================================================================================
 func _get_configuration_warnings() -> PackedStringArray:
-	_warnings = []
-	if to == null:
-		_warnings.append("The TO property in the inspector cannot be null.")
-		
+	_warnings.clear()
+
 	if not get_parent() is Node3D:
-		_warnings.append("The parent node of DeepRayCast3D must be a 3D node.")
-		
-	if get_parent() == to:
-		_warnings.append("The TO property cannot be the parent node of DeepRayCast3D.")
+		_warnings.append("The parent of DeepRayCast3D must be a 3D node.")
+
+	if not auto_forward:
+		if to == null:
+			_warnings.append("The TO property cannot be null when Auto Forward is disabled.")
+		elif get_parent() == to:
+			_warnings.append("The TO property cannot be the same as the parent node.")
+
 	return _warnings
-	
-	
+
+
 func _enter_tree() -> void:
 	update_configuration_warnings()
-	
+
 
 func _ready() -> void:
 	_material = _RESOURCE_MATERIAL
@@ -260,8 +284,10 @@ func _ready() -> void:
 	for e in excludes:
 		if e:
 			_excludes.append(e.get_rid())
-	if exclude_parent == true:
+
+	if exclude_parent:
 		add_exclude(get_parent())
+
 	_create_line()
 	_update_line()
 	_update_raycast()
@@ -272,4 +298,4 @@ func _physics_process(_delta: float) -> void:
 	_update_line()
 	_update_raycast()
 	_verify_mesh()
-#endregion Lifecycles ==============================================================================
+#endregion =========================================================================================
