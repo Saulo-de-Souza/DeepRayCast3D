@@ -325,7 +325,6 @@ func _ready() -> void:
 
 	_create_line()
 	_update_line()
-	_update_raycast()
 	_verify_mesh()
 
 
