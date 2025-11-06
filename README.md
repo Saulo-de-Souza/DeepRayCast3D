@@ -184,4 +184,5 @@ func _input(event):
 
 **Screenshot InputManager**
 
-![Screenshot 1](./addons/input_manager/screenshots/all.png)
+![Screenshot 1](./addons/deep_raycast_3d/screenshots/2.png)
+![Screenshot 2](./addons/deep_raycast_3d/screenshots/1.png)
