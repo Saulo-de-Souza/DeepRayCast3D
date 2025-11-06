@@ -4,16 +4,17 @@ extends Node3D
 # TODO: Alterar TO para um Vector3
 
 #region Private Properties =========================================================================
-var RESOURCE_MATERIAL: StandardMaterial3D = preload("res://addons/deep_raycast_3d/resources/material.tres")
+var _RESOURCE_MATERIAL: StandardMaterial3D = preload("res://addons/deep_raycast_3d/resources/material.tres")
 var _node_container: Node3D = null
 var _mesh_instance: MeshInstance3D = null
 var _mesh: CylinderMesh = null
 var _direction: Vector3 = Vector3.ZERO
 var _distance: float = 0.0
 var _excludes: Array[RID] = []
-var _material: StandardMaterial3D = RESOURCE_MATERIAL
-var deep_results: Array[DeepRaycast3DResult] = []
+var _material: StandardMaterial3D = _RESOURCE_MATERIAL
+var _deep_results: Array[DeepRaycast3DResult] = []
 var _params: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+var _warnings = []
 #endregion Private Properties ======================================================================
 
 signal cast_collider(results: Array[DeepRaycast3DResult])
@@ -217,7 +218,7 @@ func _update_raycast() -> void:
 	var remaining_distance := global_position.distance_to(to.global_position)
 
 	var local_excludes: Array = _excludes.duplicate()
-	deep_results.clear()
+	_deep_results.clear()
 
 	for i in range(max_results):
 		if remaining_distance <= 0.0:
@@ -240,15 +241,15 @@ func _update_raycast() -> void:
 		if hit.is_empty():
 			break
 
-		deep_results.append(DeepRaycast3DResult.new(hit.collider, hit.collider_id, hit.normal, hit.position, hit.face_index, hit.rid, hit.shape))
+		_deep_results.append(DeepRaycast3DResult.new(hit.collider, hit.collider_id, hit.normal, hit.position, hit.face_index, hit.rid, hit.shape))
 
 		local_excludes.append(hit["collider"].get_rid())
 
 		from = hit["position"] + to_dir * margin
 		remaining_distance = to.global_position.distance_to(from)
 
-	if deep_results.size() > 0:
-		cast_collider.emit(deep_results)
+	if _deep_results.size() > 0:
+		cast_collider.emit(_deep_results)
 	
 
 #endregion Private Methods =========================================================================
@@ -256,16 +257,16 @@ func _update_raycast() -> void:
 
 #region Lifecycles =================================================================================
 func _get_configuration_warnings() -> PackedStringArray:
-	var warnings = []
+	_warnings = []
 	if to == null:
-		warnings.append("The TO property in the inspector cannot be null.")
+		_warnings.append("The TO property in the inspector cannot be null.")
 		
 	if not get_parent() is Node3D:
-		warnings.append("The parent node of DeepRayCast3D must be a 3D node.")
+		_warnings.append("The parent node of DeepRayCast3D must be a 3D node.")
 		
 	if get_parent() == to:
-		warnings.append("The TO property cannot be the parent node of DeepRayCast3D.")
-	return warnings
+		_warnings.append("The TO property cannot be the parent node of DeepRayCast3D.")
+	return _warnings
 	
 	
 func _enter_tree() -> void:
@@ -273,7 +274,7 @@ func _enter_tree() -> void:
 	
 
 func _ready() -> void:
-	_material = RESOURCE_MATERIAL
+	_material = _RESOURCE_MATERIAL
 
 	for e in excludes:
 		if e:
