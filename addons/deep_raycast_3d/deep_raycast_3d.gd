@@ -1,4 +1,5 @@
 @tool
+@icon("res://addons/deep_raycast_3d/icon-16.png")
 class_name DeepRayCast3D extends Node
 
 #region Private Properties =========================================================================
