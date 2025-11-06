@@ -33,12 +33,15 @@ It allows a single ray to **pass through multiple colliders**, detecting all int
 Automatically casts the ray in the forward direction of the **parent** node.
 
 ```gdscript
-@onready var ray = $DeepRayCast3D
+@onready var deep_ray_cast_3d: DeepRayCast3D = $Player/DeepRayCast3D
 
-func _physics_process(delta):
-    if ray._deep_results.size() > 0:
-        for hit in ray._deep_results:
-            print("Hit:", hit.collider, "at", hit.position)
+func _physics_process(_delta):
+	if deep_ray_cast_3d.get_collider_count() > 0:
+		for i in range(deep_ray_cast_3d.get_collider_count()):
+			var collider = deep_ray_cast_3d.get_collider(i)
+			var normal = deep_ray_cast_3d.get_normal(i)
+			var pos = deep_ray_cast_3d.get_position(i)
+			print("Collider: ", collider, " Normal: ", normal, " Position: ", pos)
 ```
 
 ### Option 2 – Manual Target Mode

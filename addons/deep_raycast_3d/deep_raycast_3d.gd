@@ -102,6 +102,19 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 
 
 #region Public Methods =============================================================================
+func get_collider_count() -> int:
+	return _deep_results.size()
+
+func get_collider(index: int) -> PhysicsBody3D:
+	return _deep_results[index].collider
+
+func get_normal(index: int) -> Vector3:
+	return _deep_results[index].normal
+
+func get_position(index: int) -> Vector3:
+	return _deep_results[index].position
+
+
 ## Add a CollisionObject3D or Area3D to be excluded from raycast detection.
 func add_exclude(_exclude: Variant) -> void:
 	if _exclude == null or not _exclude.has_method("get_rid"):
