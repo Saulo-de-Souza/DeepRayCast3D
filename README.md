@@ -1,24 +1,24 @@
 # DeepRayCast3D — Advanced Multi-Collision Raycast for Godot 4.x
 
-![Godot Icon](https://godotengine.org/themes/godotengine/assets/press/icon_color.png)
+<img src="https://godotengine.org/asset-library/assets/logo_dark.svg" alt="Godot Icon" width="100"/>
 
 **DeepRayCast3D** is a powerful and flexible GDScript-based tool that extends the built-in `RayCast3D` capabilities.  
 It allows a single ray to **pass through multiple colliders**, detecting all intersections along its path — perfect for visual effects, physics-based gameplay, or complex detection logic.
 
 ---
 
-## 🌟 Features
+## Features
 
-- 🔁 **Multi-hit Raycasting** – detects all collisions along a ray, not just the first one.
-- 🎯 **Dual Mode Targeting** – automatic forward direction or custom target node.
-- 🧠 **Smart Exclusions** – ignore the parent or other specific objects easily.
-- 💡 **Visual Debug Mesh** – configurable 3D ray visualization with emission and opacity.
-- ⚙️ **Physics Layer Control** – selective collision detection using layer masks.
-- 🧩 **Lightweight and Editor-Friendly** – updates in real-time in both editor and game mode.
+- **Multi-hit Raycasting** – detects all collisions along a ray, not just the first one.
+- **Dual Mode Targeting** – automatic forward direction or custom target node.
+- **Smart Exclusions** – ignore the parent or other specific objects easily.
+- **Visual Debug Mesh** – configurable 3D ray visualization with emission and opacity.
+- **Physics Layer Control** – selective collision detection using layer masks.
+- **Lightweight and Editor-Friendly** – updates in real-time in both editor and game mode.
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 1. Copy the folder `addons/deep_raycast_3d/` into your Godot project.
 2. In the **Project > Project Settings > Plugins** tab, enable **DeepRayCast3D**.
@@ -26,7 +26,7 @@ It allows a single ray to **pass through multiple colliders**, detecting all int
 
 ---
 
-## 🧭 Usage
+## Usage
 
 ### Option 1 – Auto Forward Mode (default)
 
@@ -52,7 +52,7 @@ ray.to = $Target
 
 ---
 
-## 🧪 Exported Properties
+## Exported Properties
 
 | Category        | Property                     | Description                                             |
 | --------------- | ---------------------------- | ------------------------------------------------------- |
@@ -75,7 +75,7 @@ ray.to = $Target
 
 ---
 
-## 🧩 Signals
+## Signals
 
 | Signal                                               | Description                                                |
 | ---------------------------------------------------- | ---------------------------------------------------------- |
@@ -83,7 +83,7 @@ ray.to = $Target
 
 ---
 
-## 🧱 Example Scene Setup
+## Example Scene Setup
 
 1. Add a `Node3D` as the parent.
 2. Add `DeepRayCast3D` as a child node.
@@ -92,7 +92,7 @@ ray.to = $Target
 
 ---
 
-## 🧰 Integration Example
+## Integration Example
 
 ```gdscript
 func _on_DeepRayCast3D_cast_collider(results):
@@ -101,22 +101,6 @@ func _on_DeepRayCast3D_cast_collider(results):
 ```
 
 ---
-
-## 🧾 License
-
-This plugin is distributed under the **MIT License**.  
-You are free to use, modify, and distribute it in commercial and non-commercial projects.
-
----
-
-## 👤 Author
-
-Developed with ❤️ by **Saulo**  
-Built for the **Godot 4.x** engine.
-
----
-
-> “Precision meets flexibility — DeepRayCast3D helps you see every collision that matters.”
 
 ## Screenshots
 
