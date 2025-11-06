@@ -1,6 +1,6 @@
 @tool
 class_name DeepRayCast3D
-extends Node3D
+extends Node
 # TODO: Alterar TO para um Vector3
 
 #region Private Properties =========================================================================
@@ -97,7 +97,6 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 
 
 #region Public Methods =============================================================================
-		
 ## Add an area or a 3D body to be excluded from raycast detections.			
 func add_exclude(_exclude: Variant) -> void:
 	if _exclude == null:
@@ -164,12 +163,14 @@ func _update_line() -> void:
 	if get_parent() == to:
 		return
 		
-	_distance = global_position.distance_to(to.global_position)
-	_direction = global_position.direction_to(to.global_position)
+	var parent: Node3D = get_parent() as Node3D
+		
+	_distance = parent.global_position.distance_to(to.global_position)
+	_direction = parent.global_position.direction_to(to.global_position)
 	_mesh.height = _distance
 	_mesh_instance.position.z = _distance / -2
-	_node_container.global_transform.origin = global_position
-	_node_container.look_at(global_position + _direction, Vector3.UP)
+	_node_container.global_transform.origin = parent.global_position
+	_node_container.look_at(parent.global_position + _direction, Vector3.UP)
 	_mesh.top_radius = radius
 	_mesh.bottom_radius = radius
 
@@ -191,20 +192,22 @@ func _update_raycast() -> void:
 		return
 	if get_parent() == to:
 		return
+	
+	var parent: Node3D = get_parent() as Node3D
 				
-	var space_state := get_world_3d().direct_space_state
-	var from := global_position
-	var to_dir := (to.global_position - global_position).normalized()
-	var remaining_distance := global_position.distance_to(to.global_position)
+	var space_state: PhysicsDirectSpaceState3D = parent.get_world_3d().direct_space_state
+	var from: Vector3 = parent.global_position
+	var to_dir: Vector3 = (to.global_position - parent.global_position).normalized()
+	var remaining_distance: float = parent.global_position.distance_to(to.global_position)
 
-	var local_excludes: Array = _excludes.duplicate()
+	var local_excludes: Array[RID] = _excludes.duplicate()
 	_deep_results.clear()
 
 	for i in range(max_results):
 		if remaining_distance <= 0.0:
 			break
 
-		var to_point := from + to_dir * remaining_distance
+		var to_point: Vector3 = from + to_dir * remaining_distance
 
 		_params = PhysicsRayQueryParameters3D.new()
 		_params.from = from
@@ -216,7 +219,7 @@ func _update_raycast() -> void:
 		_params.hit_back_faces = hit_back_faces
 		_params.hit_from_inside = hit_from_inside
 
-		var hit := space_state.intersect_ray(_params)
+		var hit: Dictionary = space_state.intersect_ray(_params)
 
 		if hit.is_empty():
 			break
@@ -267,7 +270,6 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	transform.origin = Vector3.ZERO
 	_update_line()
 	_update_raycast()
 	_verify_mesh()
