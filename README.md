@@ -1,15 +1,15 @@
-# DeepRayCast3D Plugin
+# DeepRayCast3D
 
 <img src="https://godotengine.org/asset-library/assets/logo_dark.svg" alt="Godot Icon" width="100"/>
 
-## 📘 Brief Description
+## Brief Description
 
-**DeepRayCast3D** is a powerful **plugin for Godot Engine 4** that allows performing **deep raycasts**, passing through multiple objects in a straight line and registering all collisions along the way.  
+**DeepRayCast3D** is a powerful **plugin for Godot Engine 4x** that allows performing **deep raycasts**, passing through multiple objects in a straight line and registering all collisions along the way.  
 It’s ideal for **shooting systems**, **obstacle detection**, **chain interactions**, **laser effects**, and more.
 
 ---
 
-## 🧩 Full Description
+## Full Description
 
 Unlike Godot’s built-in `RayCast3D`, the `DeepRayCast3D` can:
 
@@ -21,27 +21,16 @@ Unlike Godot’s built-in `RayCast3D`, the `DeepRayCast3D` can:
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 This node must be added as a **child of a Node3D**.  
 It continuously emits a ray during `_physics_process`, detects collisions, and updates its visual beam both in the **editor** and **runtime**.
 
 ---
 
-## 🧱 Main Structure
+## Inspector Properties
 
-```gdscript
-@tool
-@icon("res://addons/deep_raycast_3d/icon-16.png")
-class_name DeepRayCast3D
-extends Node
-```
-
----
-
-## 🚀 Inspector Properties
-
-### 🟦 Process
+### Process
 
 | Property      | Type    | Description                                      |
 | ------------- | ------- | ------------------------------------------------ |
@@ -49,7 +38,7 @@ extends Node
 | `margin`      | `float` | Margin distance between consecutive collisions.  |
 | `max_results` | `int`   | Maximum number of collisions the ray can detect. |
 
-### 🟨 Emission
+### Emission
 
 | Property            | Type    | Description                               |
 | ------------------- | ------- | ----------------------------------------- |
@@ -58,7 +47,7 @@ extends Node
 | `rings`             | `int`   | Number of rings in the cylinder mesh.     |
 | `segments`          | `int`   | Number of radial segments in the mesh.    |
 
-### 🟩 Interaction
+### Interaction
 
 | Property           | Type            | Description                                                      |
 | ------------------ | --------------- | ---------------------------------------------------------------- |
@@ -68,7 +57,7 @@ extends Node
 | `exclude_parent`   | `bool`          | Excludes the parent node from collision detection.               |
 | `excludes`         | `Array[Node3D]` | Manual exclusion list.                                           |
 
-### 🟪 Physics
+### Physics
 
 | Property              | Type   | Description                                          |
 | --------------------- | ------ | ---------------------------------------------------- |
@@ -78,7 +67,7 @@ extends Node
 | `hit_from_inside`     | `bool` | Detects collisions even when starting inside shapes. |
 | `collision_mask`      | `int`  | Physics layer bitmask for collision detection.       |
 
-### 🟥 Render
+### Render
 
 | Property          | Type    | Description                                 |
 | ----------------- | ------- | ------------------------------------------- |
@@ -88,7 +77,7 @@ extends Node
 | `opacity`         | `float` | Beam transparency.                          |
 | `layers`          | `int`   | Render layers the ray belongs to.           |
 
-### ⚫ Transform
+### Transform
 
 | Property          | Type      | Description                                  |
 | ----------------- | --------- | -------------------------------------------- |
@@ -96,7 +85,7 @@ extends Node
 
 ---
 
-## 🔔 Signals
+## Signals
 
 ### `cast_collider(results: Array[DeepRaycast3DResult])`
 
@@ -116,7 +105,7 @@ func _on_cast_collider(results: Array):
 
 ---
 
-## 🧠 Public Methods
+## Public Methods
 
 | Method                     | Returns         | Description                                     |
 | -------------------------- | --------------- | ----------------------------------------------- |
@@ -129,7 +118,7 @@ func _on_cast_collider(results: Array):
 
 ---
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### 🔹 Accessing Collisions Manually
 
@@ -175,33 +164,21 @@ func _input(event):
 
 ---
 
-## 🧰 Requirements
+## Requirements
 
-- Godot Engine 4.0 or higher
+- Godot Engine 4x or higher
 - Plugin installed in folder:  
   `res://addons/deep_raycast_3d/`
 
 ---
 
-## 📦 Installation
+## Installation
 
 1. Copy the folder `addons/deep_raycast_3d` into your project.
 2. Enable the plugin under **Project → Project Settings → Plugins**.
 3. Add a `DeepRayCast3D` node as a child of a `Node3D`.
 
 ---
-
-## 🧑‍💻 Author
-
-**Developed by Saulo**  
-A plugin made to expand Godot’s raycasting capabilities with precision and professional control.
-
----
-
-## 🏷️ License
-
-This project is licensed under the **MIT License**.  
-Feel free to use, modify, and distribute it.
 
 ## Screenshots
 
