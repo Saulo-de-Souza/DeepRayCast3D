@@ -11,7 +11,7 @@ var _mesh: CylinderMesh
 var _direction: Vector3 = Vector3.ZERO
 var _distance: float = 0.0
 var _excludes: Array[RID] = []
-var _material: StandardMaterial3D = _RESOURCE_MATERIAL
+var _material: StandardMaterial3D = _RESOURCE_MATERIAL.duplicate()
 var _deep_results: Array[DeepRaycast3DResult] = []
 var _params: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
 var _warnings: PackedStringArray = []
@@ -304,7 +304,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	_material = _RESOURCE_MATERIAL
+	_material = _RESOURCE_MATERIAL.duplicate()
 
 	for e in excludes:
 		if e:
