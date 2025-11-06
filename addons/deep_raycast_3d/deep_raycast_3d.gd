@@ -59,7 +59,6 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 	set(value):
 		to = value
 		update_configuration_warnings()
-
 ## Ignore parent node from collision checks.
 @export var exclude_parent: bool = true:
 	set(value):
@@ -69,7 +68,6 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 				add_exclude(get_parent())
 			else:
 				remove_exclude(get_parent())
-
 ## Manual exclusion list.
 @export var excludes: Array[Node3D] = []
 
@@ -86,6 +84,12 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 @export_flags_3d_physics() var collision_mask = (1 << 0)
 
 @export_subgroup("Render")
+## Enables or disables raycast viewing.
+@export var raycast_visible: bool = true:
+	set(value):
+		raycast_visible = value
+		if is_instance_valid(_node_container):
+			_node_container.visible = raycast_visible
 ## Raycast display color in 3D space.
 @export_color_no_alpha() var color: Color = Color.RED
 ## The raycast radius.
@@ -154,6 +158,7 @@ func _create_line() -> void:
 	_mesh.material = _material
 
 	_node_container = Node3D.new()
+	_node_container.visible = raycast_visible
 	add_child(_node_container)
 
 	_mesh_instance = MeshInstance3D.new()
@@ -203,12 +208,13 @@ func _update_line() -> void:
 	_mesh.top_radius = radius
 	_mesh.bottom_radius = radius
 
-	# Update material in real-time
 	_material.emission = color
 	_material.albedo_color = color
 	_material.albedo_color.a = opacity
 	_material.emission_enabled = activate_emission
 	_material.emission_energy_multiplier = emission_energy
+
+	_node_container.visible = raycast_visible
 
 
 func _update_raycast() -> void:
