@@ -104,12 +104,9 @@ func add_exclude(_exclude: Variant) -> void:
 		return
 	if not _exclude.has_method("get_rid"):
 		return
-		
 	if _excludes.has(_exclude.get_rid()):
 		return
-	if _exclude.has_method("get_rid"):
-		_excludes.append(_exclude.get_rid())
-
+	_excludes.append(_exclude.get_rid())
 	if is_instance_valid(_params):
 		_params.exclude = _excludes
 
@@ -119,9 +116,8 @@ func remove_exclude(_exclude: Variant) -> void:
 	if _exclude.has_method("get_rid"):
 		if _excludes.has(_exclude.get_rid()):
 			_excludes.erase(_exclude.get_rid())
-	
-	if is_instance_valid(_params):
-		_params.exclude = _excludes
+		if is_instance_valid(_params):
+			_params.exclude = _excludes
 #endregion Public Methods ==========================================================================
 
 
@@ -153,7 +149,7 @@ func _create_line() -> void:
 
 	_node_container.add_child(_mesh_instance)
 	
-func _desative_raycast() -> void:
+func _verify_mesh() -> void:
 	if not get_parent() is Node3D or to == null or get_parent() == to:
 		_mesh_instance.visible = false
 	else:
@@ -163,10 +159,8 @@ func _desative_raycast() -> void:
 func _update_line() -> void:
 	if to == null:
 		return
-	
 	if not get_parent() is Node3D:
 		return
-		
 	if get_parent() == to:
 		return
 		
@@ -191,13 +185,10 @@ func _update_raycast() -> void:
 		return
 	if not enabled:
 		return
-		
 	if not get_parent() is Node3D:
 		return
-		
 	if to == null:
 		return
-		
 	if get_parent() == to:
 		return
 				
@@ -240,7 +231,6 @@ func _update_raycast() -> void:
 	if _deep_results.size() > 0:
 		cast_collider.emit(_deep_results)
 	
-
 #endregion Private Methods =========================================================================
 
 
@@ -273,12 +263,12 @@ func _ready() -> void:
 	_create_line()
 	_update_line()
 	_update_raycast()
-	_desative_raycast()
+	_verify_mesh()
 
 
 func _physics_process(_delta: float) -> void:
 	transform.origin = Vector3.ZERO
 	_update_line()
 	_update_raycast()
-	_desative_raycast()
+	_verify_mesh()
 #endregion Lifecycles ==============================================================================
