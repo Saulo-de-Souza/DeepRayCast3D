@@ -48,11 +48,17 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 
 @export_subgroup("Interaction")
 ## When enabled, the ray will automatically face forward based on the parent's orientation.
-@export var auto_forward: bool = true
+@export var auto_forward: bool = true:
+	set(value):
+		auto_forward = value
+		update_configuration_warnings()
 ## Distance of the ray when auto_forward is enabled.
 @export_range(0.1, 100.0, 0.1, "suffix:m") var forward_distance: float = 10.0
 ## Target node when auto_forward is disabled (manual mode).
-@export var to: Node3D
+@export var to: Node3D:
+	set(value):
+		to = value
+		update_configuration_warnings()
 
 ## Ignore parent node from collision checks.
 @export var exclude_parent: bool = true:
