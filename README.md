@@ -53,9 +53,8 @@ It continuously emits a ray during `_physics_process`, detects collisions, and u
 | ------------------ | --------------- | ---------------------------------------------------------------- |
 | `auto_forward`     | `bool`          | If true, the ray automatically faces forward (-Z of the parent). |
 | `forward_distance` | `float`         | Ray distance when `auto_forward` is enabled.                     |
-| `to`               | `Node3D`        | Target node (used only when `auto_forward` is disabled).         |
+| `target`           | `PhysicsBody3D` | Target node (used only when `auto_forward` is disabled).         |
 | `exclude_parent`   | `bool`          | Excludes the parent node from collision detection.               |
-| `excludes`         | `Array[Node3D]` | Manual exclusion list.                                           |
 
 ### Physics
 
@@ -107,14 +106,15 @@ func _on_cast_collider(results: Array):
 
 ## Public Methods
 
-| Method                     | Returns         | Description                                     |
-| -------------------------- | --------------- | ----------------------------------------------- |
-| `get_collider_count()`     | `int`           | Returns the number of detected colliders.       |
-| `get_collider(index: int)` | `PhysicsBody3D` | Returns the collider at the given index.        |
-| `get_normal(index: int)`   | `Vector3`       | Returns the collision normal vector.            |
-| `get_position(index: int)` | `Vector3`       | Returns the collision point position.           |
-| `add_exclude(target)`      | `void`          | Adds a node or body to the exclusion list.      |
-| `remove_exclude(target)`   | `void`          | Removes a node or body from the exclusion list. |
+| Method                     | Returns         | Description                                                          |
+| -------------------------- | --------------- | -------------------------------------------------------------------- |
+| `get_collider_count()`     | `int`           | Returns the number of detected colliders.                            |
+| `get_collider(index: int)` | `PhysicsBody3D` | Returns the collider at the given index.                             |
+| `get_normal(index: int)`   | `Vector3`       | Returns the collision normal vector.                                 |
+| `get_position(index: int)` | `Vector3`       | Returns the collision point position.                                |
+| `add_exclude(target)`      | `void`          | Adds a node or body to the exclusion list.                           |
+| `remove_exclude(target)`   | `void`          | Removes a node or body from the exclusion list.                      |
+| `clear_exclude()`          | `void`          | Clears the exclusion list, allowing all bodies to be detected again. |
 
 ---
 
