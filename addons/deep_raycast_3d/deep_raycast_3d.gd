@@ -1,7 +1,18 @@
 @tool
 @icon("res://addons/deep_raycast_3d/icon-16.png")
-class_name DeepRayCast3D
-extends Node
+
+## DeepRayCast3D is a powerful plugin for Godot Engine 4x that allows performing deep raycasts, passing through multiple objects in a straight line and registering all collisions along the way.
+##
+## It’s ideal for shooting systems, obstacle detection, chain interactions, laser effects, and more.
+##
+## It can detect [b]multiple[/b] objects aligned along a beam by automatically excluding each hit collider before continuing the scan beyond it.  
+##
+## In addition to its physical functionality, the node can display a [b]visual 3D beam[/b] with customizable color, opacity, emission, and geometry, useful for debugging or visual effects.
+##
+## When [b]auto_forward[/b] is enabled, the beam is projected automatically along the parent’s forward direction (-Z axis).  
+##
+## When disabled, you can target another [b]Node3D[/b] via the [b]to_path[/b] property.
+class_name DeepRayCast3D extends Node
 
 #region Private Properties =========================================================================
 var _RESOURCE_MATERIAL: StandardMaterial3D = preload("res://addons/deep_raycast_3d/resources/material.tres")
@@ -17,6 +28,7 @@ var _params: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
 var _warnings: PackedStringArray = []
 #endregion =========================================================================================
 
+## Emitted whenever the deep raycast detects one or more collisions. The `results` parameter contains an array of `DeepRayCast3DResult` objects — one for each detected hit.
 signal cast_collider(results: Array[DeepRaycast3DResult])
 
 #region Exports ====================================================================================
@@ -55,9 +67,9 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 ## Distance of the ray when auto_forward is enabled.
 @export_range(0.1, 100.0, 0.1, "suffix:m") var forward_distance: float = 10.0
 ## Target node when auto_forward is disabled (manual mode).
-@export var to: Node3D:
+@export var target: PhysicsBody3D:
 	set(value):
-		to = value
+		target = value
 		update_configuration_warnings()
 ## Ignore parent node from collision checks.
 @export var exclude_parent: bool = true:
@@ -68,8 +80,6 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 				add_exclude(get_parent())
 			else:
 				remove_exclude(get_parent())
-## Manual exclusion list.
-@export var excludes: Array[Node3D] = []
 
 @export_subgroup("Physics")
 ## Enable or disable collision checking with bodies.
@@ -114,21 +124,24 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 
 
 #region Public Methods =============================================================================
+## Returns the number of colliders detected in the last deep raycast execution.
 func get_collider_count() -> int:
 	return _deep_results.size()
 
+## Returns the physics body corresponding to the given hit index from the last deep raycast result. The index must be between `0` and `get_collider_count() - 1`.
 func get_collider(index: int) -> PhysicsBody3D:
 	return _deep_results[index].collider
 
+## Returns the surface normal vector of the collision at the given hit index. This vector represents the perpendicular direction to the impacted surface.
 func get_normal(index: int) -> Vector3:
 	return _deep_results[index].normal
 
+## Returns the global position of the collision point for the specified hit index.
 func get_position(index: int) -> Vector3:
 	return _deep_results[index].position
 
-
 ## Add a CollisionObject3D or Area3D to be excluded from raycast detection.
-func add_exclude(_exclude: Variant) -> void:
+func add_exclude(_exclude: PhysicsBody3D) -> void:
 	if _exclude == null or not _exclude.has_method("get_rid"):
 		return
 	if _excludes.has(_exclude.get_rid()):
@@ -139,12 +152,17 @@ func add_exclude(_exclude: Variant) -> void:
 
 
 ## Remove a previously excluded object from the raycast.
-func remove_exclude(_exclude: Variant) -> void:
+func remove_exclude(_exclude: PhysicsBody3D) -> void:
 	if _exclude and _exclude.has_method("get_rid"):
 		if _excludes.has(_exclude.get_rid()):
 			_excludes.erase(_exclude.get_rid())
 		if is_instance_valid(_params):
 			_params.exclude = _excludes
+
+## Clears the exclusion list, allowing all bodies to be detected again.
+func clear_exclude() -> void:
+	_excludes.clear()
+	_params.exclude = _excludes
 #endregion =========================================================================================
 
 
@@ -184,7 +202,7 @@ func _verify_mesh() -> void:
 	if not get_parent() is Node3D:
 		_mesh_instance.visible = false
 		return
-	if not auto_forward and (to == null or get_parent() == to):
+	if not auto_forward and (target == null or get_parent() == target):
 		_mesh_instance.visible = false
 	else:
 		_mesh_instance.visible = true
@@ -203,9 +221,9 @@ func _update_line() -> void:
 		# Always points forward relative to parent's local -Z axis
 		target_position = start_position + (parent.global_transform.basis.z * -forward_distance)
 	else:
-		if to == null or get_parent() == to:
+		if target == null or get_parent() == target:
 			return
-		target_position = to.global_position
+		target_position = target.global_position
 
 	_distance = start_position.distance_to(target_position)
 	_direction = start_position.direction_to(target_position)
@@ -241,9 +259,9 @@ func _update_raycast() -> void:
 	if auto_forward:
 		target_position = from + (parent.global_transform.basis.z * -forward_distance)
 	else:
-		if to == null or get_parent() == to:
+		if target == null or get_parent() == target:
 			return
-		target_position = to.global_position
+		target_position = target.global_position
 
 	var to_dir: Vector3 = (target_position - from).normalized()
 	var remaining_distance: float = from.distance_to(target_position)
@@ -301,10 +319,10 @@ func _get_configuration_warnings() -> PackedStringArray:
 		_warnings.append("The parent of DeepRayCast3D must be a 3D node.")
 
 	if not auto_forward:
-		if to == null:
-			_warnings.append("The TO property cannot be null when Auto Forward is disabled.")
-		elif get_parent() == to:
-			_warnings.append("The TO property cannot be the same as the parent node.")
+		if target == null:
+			_warnings.append("The target property cannot be null when Auto Forward is disabled.")
+		elif get_parent() == target:
+			_warnings.append("The target property cannot be the same as the parent node.")
 
 	return _warnings
 
@@ -315,10 +333,6 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	_material = _RESOURCE_MATERIAL.duplicate()
-
-	for e in excludes:
-		if e:
-			_excludes.append(e.get_rid())
 
 	if exclude_parent:
 		add_exclude(get_parent())
