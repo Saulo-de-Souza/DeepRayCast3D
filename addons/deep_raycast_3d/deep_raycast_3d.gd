@@ -75,6 +75,8 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 @export var exclude_parent: bool = true:
 	set(value):
 		exclude_parent = value
+		if not get_parent() is PhysicsBody3D:
+			return
 		if get_parent():
 			if exclude_parent:
 				add_exclude(get_parent())
@@ -334,7 +336,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_material = _RESOURCE_MATERIAL.duplicate()
 
-	if exclude_parent:
+	if exclude_parent and get_parent() is PhysicsBody3D:
 		add_exclude(get_parent())
 
 	_create_line()
