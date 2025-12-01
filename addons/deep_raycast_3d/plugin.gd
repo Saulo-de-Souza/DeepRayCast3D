@@ -3,7 +3,7 @@ extends EditorPlugin
 
 var script_main: Script = preload("res://addons/deep_raycast_3d/deep_raycast_3d.gd")
 var script_result: Script = preload("res://addons/deep_raycast_3d/deep_raycast_3d_result.gd")
-var icon = preload("res://addons/deep_raycast_3d/icon-16.png")
+var icon = preload("res://addons/deep_raycast_3d/icon.svg")
 
 func _enable_plugin() -> void:
 	add_custom_type("DeepRayCast3D", "Node", script_main, icon)

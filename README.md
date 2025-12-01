@@ -1,6 +1,7 @@
-# DeepRayCast3D
-
-<img src="https://godotengine.org/asset-library/assets/logo_dark.svg" alt="Godot Icon" width="100"/>
+<h1 align="center"> Deep RayCast 3D</h1>
+<div align="center">
+<img src="addons/deep_raycast_3d/icon.svg" alt="Godot Icon" width="200"/>
+</div>
 
 ## Brief Description
 

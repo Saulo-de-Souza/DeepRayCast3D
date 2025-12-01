@@ -1,5 +1,5 @@
 @tool
-@icon("res://addons/deep_raycast_3d/icon-16.png")
+@icon("res://addons/deep_raycast_3d/icon.svg")
 
 ## DeepRayCast3D is a powerful plugin for Godot Engine 4x that allows performing deep raycasts, passing through multiple objects in a straight line and registering all collisions along the way.
 ##
