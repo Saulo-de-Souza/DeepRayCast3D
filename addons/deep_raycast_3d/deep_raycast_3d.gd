@@ -71,6 +71,8 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 	set(value):
 		target = value
 		update_configuration_warnings()
+## Offset Positition in target.
+@export var target_offset_position: Vector3 = Vector3.ZERO
 ## Ignore parent node from collision checks.
 @export var exclude_parent: bool = true:
 	set(value):
@@ -225,7 +227,7 @@ func _update_line() -> void:
 	else:
 		if target == null or get_parent() == target:
 			return
-		target_position = target.global_position
+		target_position = target.global_position + target_offset_position
 
 	_distance = start_position.distance_to(target_position)
 	_direction = start_position.direction_to(target_position)
@@ -263,7 +265,7 @@ func _update_raycast() -> void:
 	else:
 		if target == null or get_parent() == target:
 			return
-		target_position = target.global_position
+		target_position = target.global_position + target_offset_position
 
 	var to_dir: Vector3 = (target_position - from).normalized()
 	var remaining_distance: float = from.distance_to(target_position)
