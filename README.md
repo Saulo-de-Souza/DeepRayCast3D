@@ -187,3 +187,10 @@ func _input(event):
 
 ![Screenshot 1](./addons/deep_raycast_3d/screenshots/2.png)
 ![Screenshot 2](./addons/deep_raycast_3d/screenshots/1.png)
+
+---
+
+## ❤️ Support
+
+If this project helps you, consider supporting:
+https://github.com/sponsors/Saulo-de-Souza
