@@ -6,3 +6,4 @@ LICENSE.md export-ignore
 addons/deep_raycast_3d/icon.png export-ignore
 addons/deep_raycast_3d/screenshots export-ignore
 /assets export-ignore
+.github export-ignore
