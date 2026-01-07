@@ -124,6 +124,12 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 		position_offset = value
 		if is_instance_valid(_node_container):
 			_update_line()
+## Rotation offset applied to the ray direction (in degrees).
+@export var rotation_offset: Vector3 = Vector3.ZERO:
+	set(value):
+		rotation_offset = value
+		if is_instance_valid(_node_container):
+			_update_line()
 #endregion =========================================================================================
 
 
@@ -221,21 +227,32 @@ func _update_line() -> void:
 	var start_position: Vector3 = parent.to_global(position_offset)
 	var target_position: Vector3
 
+	var base_direction: Vector3
 	if auto_forward:
-		# Always points forward relative to parent's local -Z axis
-		target_position = start_position + (parent.global_transform.basis.z * -forward_distance)
+		base_direction = parent.global_transform.basis.z * -1.0
 	else:
 		if target == null or get_parent() == target:
 			return
-		target_position = target.global_position + target_offset_position
+		base_direction = start_position.direction_to(
+			target.global_position + target_offset_position
+		)
+	_direction = _apply_rotation_offset(base_direction).normalized()
+	_distance = forward_distance if auto_forward else start_position.distance_to(
+		target.global_position + target_offset_position
+	)
+	target_position = start_position + _direction * _distance
 
-	_distance = start_position.distance_to(target_position)
-	_direction = start_position.direction_to(target_position)
 
 	_mesh.height = _distance
 	_mesh_instance.position.z = _distance / -2
 	_node_container.global_transform.origin = start_position
-	_node_container.look_at(start_position + _direction, Vector3.UP)
+	
+	var up := Vector3.UP
+	if abs(_direction.dot(up)) > 0.999:
+		up = Vector3.FORWARD
+	_node_container.look_at(start_position + _direction, up)
+
+
 	_mesh.top_radius = radius
 	_mesh.bottom_radius = radius
 
@@ -267,9 +284,15 @@ func _update_raycast() -> void:
 			return
 		target_position = target.global_position + target_offset_position
 
-	var to_dir: Vector3 = (target_position - from).normalized()
-	var remaining_distance: float = from.distance_to(target_position)
+	var base_direction: Vector3
+	if auto_forward:
+		base_direction = parent.global_transform.basis.z * -1.0
+	else:
+		base_direction = (target_position - from).normalized()
+	var to_dir: Vector3 = _apply_rotation_offset(base_direction).normalized()
 
+
+	var remaining_distance: float = from.distance_to(target_position)
 	var space_state: PhysicsDirectSpaceState3D = parent.get_world_3d().direct_space_state
 	var local_excludes: Array[RID] = _excludes.duplicate()
 	_deep_results.clear()
@@ -350,4 +373,22 @@ func _physics_process(_delta: float) -> void:
 	_update_line()
 	_update_raycast()
 	_verify_mesh()
+#endregion =========================================================================================
+
+
+#region HELPERS ====================================================================================
+func _apply_rotation_offset(direction: Vector3) -> Vector3:
+	if rotation_offset == Vector3.ZERO:
+		return direction
+
+	var basis := Basis.from_euler(
+		Vector3(
+			deg_to_rad(rotation_offset.x),
+			deg_to_rad(rotation_offset.y),
+			deg_to_rad(rotation_offset.z)
+		)
+	)
+
+	return basis * direction
+
 #endregion =========================================================================================
