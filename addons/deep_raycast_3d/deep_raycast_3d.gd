@@ -77,13 +77,19 @@ signal cast_collider(results: Array[DeepRaycast3DResult])
 @export var exclude_parent: bool = true:
 	set(value):
 		exclude_parent = value
-		if not get_parent() is PhysicsBody3D:
-			return
-		if get_parent():
-			if exclude_parent:
-				add_exclude(get_parent())
-			else:
-				remove_exclude(get_parent())
+		if not is_node_ready(): return
+		if is_instance_valid(owner):
+			if owner is PhysicsBody3D:
+				if exclude_parent:
+					add_exclude(owner)
+				else:
+					remove_exclude(owner)
+			for child in owner.get_children():
+				if child is PhysicsBody3D:
+					if exclude_parent:
+						add_exclude(child)
+					else:
+						remove_exclude(child)
 
 @export_subgroup("Physics")
 ## Enable or disable collision checking with bodies.
@@ -361,8 +367,18 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_material = _RESOURCE_MATERIAL.duplicate()
 
-	if exclude_parent and get_parent() is PhysicsBody3D:
-		add_exclude(get_parent())
+	if is_instance_valid(owner):
+		if owner is PhysicsBody3D:
+			if exclude_parent:
+				add_exclude(owner)
+			else:
+				remove_exclude(owner)
+		for child in owner.get_children():
+			if child is PhysicsBody3D:
+				if exclude_parent:
+					add_exclude(child)
+				else:
+					remove_exclude(child)
 
 	_create_line()
 	_update_line()
