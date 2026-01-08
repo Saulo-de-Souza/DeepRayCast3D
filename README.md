@@ -107,15 +107,15 @@ func _on_cast_collider(results: Array):
 
 ## Public Methods
 
-| Method                     | Returns         | Description                                                          |
-| -------------------------- | --------------- | -------------------------------------------------------------------- |
-| `get_collider_count()`     | `int`           | Returns the number of detected colliders.                            |
-| `get_collider(index: int)` | `PhysicsBody3D` | Returns the collider at the given index.                             |
-| `get_normal(index: int)`   | `Vector3`       | Returns the collision normal vector.                                 |
-| `get_position(index: int)` | `Vector3`       | Returns the collision point position.                                |
-| `add_exclude(target)`      | `void`          | Adds a node or body to the exclusion list.                           |
-| `remove_exclude(target)`   | `void`          | Removes a node or body from the exclusion list.                      |
-| `clear_exclude()`          | `void`          | Clears the exclusion list, allowing all bodies to be detected again. |
+| Method                         | Returns         | Description                                                          |
+| ------------------------------ | --------------- | -------------------------------------------------------------------- |
+| `get_collider_count()`         | `int`           | Returns the number of detected colliders.                            |
+| `get_collider(index: int)`     | `PhysicsBody3D` | Returns the collider at the given index.                             |
+| `get_normal(index: int)`       | `Vector3`       | Returns the collision normal vector.                                 |
+| `get_hit_position(index: int)` | `Vector3`       | Returns the collision point position.                                |
+| `add_exclude(target)`          | `void`          | Adds a node or body to the exclusion list.                           |
+| `remove_exclude(target)`       | `void`          | Removes a node or body from the exclusion list.                      |
+| `clear_exclude()`              | `void`          | Clears the exclusion list, allowing all bodies to be detected again. |
 
 ---
 
@@ -130,7 +130,7 @@ func _physics_process(_delta):
     var count = deep_ray.get_collider_count()
     for i in range(count):
         var collider = deep_ray.get_collider(i)
-        var position = deep_ray.get_position(i)
+        var position = deep_ray.get_hit_position(i)
         var normal = deep_ray.get_normal(i)
         print("Hit:", collider.name, "at", position, "normal:", normal)
 ```

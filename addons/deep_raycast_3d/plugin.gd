@@ -6,7 +6,7 @@ var script_result: Script = preload("res://addons/deep_raycast_3d/deep_raycast_3
 var icon = preload("res://addons/deep_raycast_3d/icon.svg")
 
 func _enable_plugin() -> void:
-	add_custom_type("DeepRayCast3D", "Node", script_main, icon)
+	add_custom_type("DeepRayCast3D", "Node3D", script_main, icon)
 	add_custom_type("DeepRaycast3DResult", "RefCounted", script_result, icon)
 
 
