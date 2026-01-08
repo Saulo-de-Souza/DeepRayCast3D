@@ -77,12 +77,6 @@ It continuously emits a ray during `_physics_process`, detects collisions, and u
 | `opacity`         | `float` | Beam transparency.                          |
 | `layers`          | `int`   | Render layers the ray belongs to.           |
 
-### Transform
-
-| Property          | Type      | Description                                  |
-| ----------------- | --------- | -------------------------------------------- |
-| `position_offset` | `Vector3` | Beam position offset relative to its parent. |
-
 ---
 
 ## Signals
